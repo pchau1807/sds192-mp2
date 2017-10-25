@@ -9,13 +9,15 @@ output: html_document
 ## Loading the data
 
 This project is so interesting and relevant to my life! I love this class. Add this
-
+candyyyyyy
 
 ```{r, include=FALSE}
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
+
+
+
 ```
-Hi! <3 uuoiuoi 
 I hate github
