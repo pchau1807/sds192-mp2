@@ -17,5 +17,20 @@ load("candidates.rda")
 load("committees.rda")
 load("contributions.rda")
 library(tidyverse)
+library(dplyr)
 ```
+
+```{r}
+committees_concise <- select(committees, -cmte_dsgn, -cmte_name, -tres_name,-cmte_st2, -cmte_city,-connected_org_name, -cmte_zip, -cmte_st1)
+committees_concise
+
+```
+
+```{r}
+candidate_detail <-  candidates %>%
+  select(cand_id,cand_name,cand_party_affiliation,cand_election_yr,cand_office_state)
+
+candidate_detail
+```
+
 
