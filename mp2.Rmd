@@ -18,20 +18,66 @@ library(dplyr)
 ```
 
 ```{r}
-committees_concise <- select(committees, -cmte_dsgn, -cmte_name, -tres_name,-cmte_st2, -cmte_city,-connected_org_name, -cmte_zip, -cmte_st1)
-committees_concise
+my_committees <- select(committees , cmte_id , cmte_state , cmte_type , cmte_party_affiliation , cmte_filing_freq,org_type , cand_id)
+#Rename column cmte_state to state
+colnames(my_committees)[colnames(my_committees)=="cmte_state"] <- "state"
 
-```
+colnames(my_committees)[colnames(my_committees)=="cmte_party_affiliation"] <- "party_affiliation"
 
-```{r}
-candidate_detail <-  candidates %>%
-  select(cand_id,cand_name,cand_party_affiliation,cand_election_yr,cand_office_state)
 
-candidate_detail
 ```
 
 ```{r}
 my_contributions <- contributions %>%
-  select("cmte_id", "name", "state", "transaction_amt", "other_id", "cand_id")
+  select(cmte_id, name, state, transaction_amt, transaction_type, cand_id)
+```
+
+```{r}
+
+my_candidate <-  candidates %>%
+  select(cand_id,cand_name,cand_party_affiliation,cand_election_yr,cand_office_state, cand_name)
+
+# Rename a column in R
+colnames(my_candidate)[colnames(my_candidate)=="cand_office_state"] <- "state"
+
+```
+
+```{r}
+#Join contributions and my_candidate by state and cand_id
+#table1 <- inner_join(my_contributions, my_candidate, by = c("cand_id", "state"))
+
+#Join all three datas: contribution, candidate, committees by state and cand_id
+#table2 <- inner_join(table1, my_committees, by = c("cand_id","state","cmte_id"))
+
+```
+
+```{r}
+
+table1 <- inner_join(my_contributions, my_committees, by = c("cmte_id", "state"))
+
+
+table2 <- inner_join(my_contributions, my_candidate, by = c("state","cand_id"))
+
+table1 <- select(table1, -cand_id.y)
+colnames(table1)[colnames(table1)=="cand_id.x"] <- "cand_id"
+
+table3 <- inner_join(table1,table2, by = c("cmte_id", "state", "cand_id", "transaction_amt", "transaction_type", "name"))
+table3 <- select(table3, -party_affiliation, -cmte_type, -cmte_filing_freq, -org_type)
+
+colnames(table3)[colnames(table3)=="cand_name"] <- "candidate_name"
+
+table3 <- mutate(table3, var = case_when(
+  "REP" ~ "R",
+  "DEM" ~ "D",
+  TRUE ~ var)
+)
+
+
+
+```
+
+```{r}
+my_house_elections <- select(house_elections,state, candidate_name, party, ge_winner)
+
 ```
 
