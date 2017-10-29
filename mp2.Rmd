@@ -8,9 +8,6 @@ output: html_document
 
 ## Loading the data
 
-This project is so interesting and relevant to my life! I love this class. Add this
-candyyyyyy
-
 ```{r, include=FALSE}
 load("house_elections.rda")
 load("candidates.rda")
@@ -33,4 +30,8 @@ candidate_detail <-  candidates %>%
 candidate_detail
 ```
 
+```{r}
+my_contributions <- contributions %>%
+  select("cmte_id", "name", "state", "transaction_amt", "other_id", "cand_id")
+```
 
