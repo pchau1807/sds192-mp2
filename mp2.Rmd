@@ -1,6 +1,6 @@
 ---
 title: "Mini-Project 2"
-author: "Phuong Chau"
+author: "Sakaiza RASOLOFOMANANA RAJERY,Phuong Chau, Ann Mudanye"
 date: "October 31, 2017"
 output: html_document
 ---
@@ -15,34 +15,22 @@ load("committees.rda")
 load("contributions.rda")
 library(tidyverse)
 library(dplyr)
-```
+library(ggplot2)
 
-```{r}
 my_committees <- select(committees , cmte_id , cmte_state , cmte_type , cmte_party_affiliation , cmte_filing_freq,org_type , cand_id)
 #Rename column cmte_state to state
 colnames(my_committees)[colnames(my_committees)=="cmte_state"] <- "state"
 
 colnames(my_committees)[colnames(my_committees)=="cmte_party_affiliation"] <- "party_affiliation"
 
-
-```
-
-```{r}
 my_contributions <- contributions %>%
   select(cmte_id, name, state, transaction_amt, transaction_type, cand_id)
-```
-
-```{r}
 
 my_candidate <-  candidates %>%
   select(cand_id,cand_name,cand_party_affiliation,cand_election_yr,cand_office_state, cand_name)
 
 # Rename a column in R
 colnames(my_candidate)[colnames(my_candidate)=="cand_office_state"] <- "state"
-
-```
-
-```{r}
 
 table1 <- inner_join(my_contributions, my_committees, by = c("cmte_id", "state"))
 
@@ -55,20 +43,29 @@ colnames(table1)[colnames(table1)=="cand_id.x"] <- "cand_id"
 table3 <- inner_join(table1,table2, by = c("cmte_id", "state", "cand_id", "transaction_amt", "transaction_type", "name"))
 table3 <- select(table3, -party_affiliation, -cmte_type, -cmte_filing_freq, -org_type)
 
+
+
 colnames(table3)[colnames(table3)=="cand_name"] <- "candidate_name"
-
-#table3 <- mutate(table3, var = case_when(
-  #"REP" ~ "R",
-  #"DEM" ~ "D",
-  #TRUE ~ var)
-#)
+table3<- table3 %>%
+  group_by(candidate_name)%>%
+  summarise(total_trans = sum(transaction_amt), candidate_id = cand_id[1])
 
 
+my_house_elections <- select(house_elections,state, candidate_name, party, ge_winner,fec_id)
+colnames(my_house_elections)[colnames(my_house_elections)=="fec_id"] <- "candidate_id"
 
-```
+table4 <- inner_join(table3, my_house_elections, by = "candidate_id") %>%
+  select(-candidate_name.y)%>%
+  filter(party == "R"|party == "D")
 
-```{r}
-my_house_elections <- select(house_elections,state, candidate_name, party, ge_winner)
+graph1 <- ggplot(table4, aes(party, total_trans)) + 
+  geom_boxplot(aes(color = ge_winner))
+
+graph1
+
+#graph2 <- ggplot(table4, aes(state, total_trans, color = ge_winner)
+
+#qplot(x = state, y = total_trans, data = table4, color = ge_winner, facet_grid(state))
 
 ```
 
