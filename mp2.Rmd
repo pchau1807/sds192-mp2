@@ -43,15 +43,6 @@ colnames(my_candidate)[colnames(my_candidate)=="cand_office_state"] <- "state"
 ```
 
 ```{r}
-#Join contributions and my_candidate by state and cand_id
-#table1 <- inner_join(my_contributions, my_candidate, by = c("cand_id", "state"))
-
-#Join all three datas: contribution, candidate, committees by state and cand_id
-#table2 <- inner_join(table1, my_committees, by = c("cand_id","state","cmte_id"))
-
-```
-
-```{r}
 
 table1 <- inner_join(my_contributions, my_committees, by = c("cmte_id", "state"))
 
@@ -66,11 +57,11 @@ table3 <- select(table3, -party_affiliation, -cmte_type, -cmte_filing_freq, -org
 
 colnames(table3)[colnames(table3)=="cand_name"] <- "candidate_name"
 
-table3 <- mutate(table3, var = case_when(
-  "REP" ~ "R",
-  "DEM" ~ "D",
-  TRUE ~ var)
-)
+#table3 <- mutate(table3, var = case_when(
+  #"REP" ~ "R",
+  #"DEM" ~ "D",
+  #TRUE ~ var)
+#)
 
 
 
