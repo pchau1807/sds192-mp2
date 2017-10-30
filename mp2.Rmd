@@ -64,9 +64,11 @@ table4 <- inner_join(table3, my_house_elections, by = "candidate_id") %>%
 
 graph1 <- ggplot(table4, aes(party, log(total_trans), color = ge_winner)) + 
   geom_boxplot() +
-  ggtitle(" A Graph Showing the Distribution of Money \nto each Candidate in their Respective Party ") +
-  ylab(label = "Total Amount Recieved") +
-  xlab(label = "Party")
+  labs(title = "THE DISTRIBUTION OF MONEY TO EACH \nCANDIDATE IN THEIR RESPECTIVE PARTY") +
+  theme(plot.title = element_text(hjust = 0, size = 16))+
+  ylab(label = "TOTAL AMOUNT RECEIVED") +
+  xlab(label = "PARTY")
+
 
 graph1
 
