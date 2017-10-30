@@ -17,6 +17,10 @@ library(tidyverse)
 library(dplyr)
 library(ggplot2)
 
+```
+
+
+```{r}
 my_committees <- select(committees , cmte_id , cmte_state , cmte_type , cmte_party_affiliation , cmte_filing_freq,org_type , cand_id)
 #Rename column cmte_state to state
 colnames(my_committees)[colnames(my_committees)=="cmte_state"] <- "state"
@@ -58,14 +62,13 @@ table4 <- inner_join(table3, my_house_elections, by = "candidate_id") %>%
   select(-candidate_name.y)%>%
   filter(party == "R"|party == "D")
 
-graph1 <- ggplot(table4, aes(party, total_trans)) + 
-  geom_boxplot(aes(color = ge_winner))
+graph1 <- ggplot(table4, aes(party, log(total_trans), color = ge_winner)) + 
+  geom_boxplot() +
+  ggtitle(" A Graph Showing the Distribution of Money \nto each Candidate in their Respective Party ") +
+  ylab(label = "Total Amount Recieved") +
+  xlab(label = "Party")
 
 graph1
-
-#graph2 <- ggplot(table4, aes(state, total_trans, color = ge_winner)
-
-#qplot(x = state, y = total_trans, data = table4, color = ge_winner, facet_grid(state))
 
 ```
 
