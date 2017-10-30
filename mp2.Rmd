@@ -6,9 +6,22 @@ output: html_document
 ---
 
 
-## Loading the data
+## MINI-PROJECT 2 
+
+**PREDICTION:** 
+
+The amount of money a committee invests on behalf of the candidate in a specific political party affects the number of votes the party earns. 
+
+
+**DATA SOURCE:** 
+ 
+Throughout this project, we are using files containing committee, candidate and campaign finance data for the 2010-2012 election cycle, that we got from the Federal Election Committee website.  (http://classic.fec.gov/finance/disclosure/ftpdet.shtml#archive_link) 
+
+ 
 
 ```{r, include=FALSE}
+##Loading the date 
+
 load("house_elections.rda")
 load("candidates.rda")
 load("committees.rda")
@@ -20,48 +33,75 @@ library(ggplot2)
 ```
 
 
+**FINAL DATA FRAME:**
+
+
 ```{r}
+#creating a new committee data frame with the selected columns below
 my_committees <- select(committees , cmte_id , cmte_state , cmte_type , cmte_party_affiliation , cmte_filing_freq,org_type , cand_id)
+
 #Rename column cmte_state to state
 colnames(my_committees)[colnames(my_committees)=="cmte_state"] <- "state"
 
+#Rename column cmte_party_affiliation to party_affiliation
 colnames(my_committees)[colnames(my_committees)=="cmte_party_affiliation"] <- "party_affiliation"
 
+#creating a new contribution data frame with the selected columns below
 my_contributions <- contributions %>%
   select(cmte_id, name, state, transaction_amt, transaction_type, cand_id)
 
+#creating a new contribution data frame with the selected columns below
 my_candidate <-  candidates %>%
   select(cand_id,cand_name,cand_party_affiliation,cand_election_yr,cand_office_state, cand_name)
 
-# Rename a column in R
+# Rename a column in R into state
 colnames(my_candidate)[colnames(my_candidate)=="cand_office_state"] <- "state"
 
+#table1 = inner joining my contributions and my comittees by, cmte_id and state
 table1 <- inner_join(my_contributions, my_committees, by = c("cmte_id", "state"))
 
-
+#table2  =  inner joining of my contributions and my candidares by state and cand_id
 table2 <- inner_join(my_contributions, my_candidate, by = c("state","cand_id"))
 
+#cleaning table1 by removing cand_id.y column and renaming cand_id.x with cand_id
 table1 <- select(table1, -cand_id.y)
 colnames(table1)[colnames(table1)=="cand_id.x"] <- "cand_id"
 
+#table3 = inner joining of table1 and 2 by the column below
 table3 <- inner_join(table1,table2, by = c("cmte_id", "state", "cand_id", "transaction_amt", "transaction_type", "name"))
+
+#cleaning out table 3 by removing unecessary column
 table3 <- select(table3, -party_affiliation, -cmte_type, -cmte_filing_freq, -org_type)
 
 
-
+#rename cand_name to candidate name in table 3
 colnames(table3)[colnames(table3)=="cand_name"] <- "candidate_name"
+
+#group by candidate name and summarize by transaction amount and candidate id
 table3<- table3 %>%
   group_by(candidate_name)%>%
   summarise(total_trans = sum(transaction_amt), candidate_id = cand_id[1])
 
-
+#create a new data frame my house election by selecting the colomun below
 my_house_elections <- select(house_elections,state, candidate_name, party, ge_winner,fec_id)
+
+#rename fec_id with candidate_id in my house election
 colnames(my_house_elections)[colnames(my_house_elections)=="fec_id"] <- "candidate_id"
 
+#create a new data frame table4, inner joining my house elections and table3
 table4 <- inner_join(table3, my_house_elections, by = "candidate_id") %>%
   select(-candidate_name.y)%>%
   filter(party == "R"|party == "D")
 
+#view the first 6 rows
+head(table4)
+```
+*First six rows of the date frame*
+
+
+**GRAPH:**
+
+```{r, warning = FALSE}
 graph1 <- ggplot(table4, aes(party, log(total_trans), color = ge_winner)) + 
   geom_boxplot() +
   labs(title = "THE DISTRIBUTION OF MONEY TO EACH \nCANDIDATE IN THEIR RESPECTIVE PARTY") +
@@ -73,4 +113,17 @@ graph1 <- ggplot(table4, aes(party, log(total_trans), color = ge_winner)) +
 graph1
 
 ```
+
+*N.B:  there are a few outliers with large values on the y-axis causing very small, difficult to represent, interpretations for other data points. Hence the use of a logarithmic scale than a linear scale to avoid this issue.*
+
+
+In the graph, the x-axis represents two different categorical variables: democracy and republican. We specifically focused the data around these two categorical variables as they are the major parties in the US.
+The y-axis indicates the continuous variable: the amount of money in dollars that has been spent on behalf or against a candidate by committees.
+
+The boxplot represents the distribution of people during the election in 2011-2012 as respect to  the amount of money that they received from their committees. The color indicates whether the distribution of a party-- either democracy (with the symbol D) or republican (with the symbol  R) is winning or losing. 
+
+**CONCLUSION:** 
+
+From this graph, we can conclude that it is plausible to win more votes when one candidate has committees spending more money into them. 
+
 
